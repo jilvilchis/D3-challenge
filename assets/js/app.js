@@ -164,13 +164,21 @@ var yAxis = chartGroup.append("g") //take care
 // Append initial circles
 var circlesGroup = chartGroup.selectAll("circle")
   .data(readData)
-  .enter()
+  .enter() 
   .append("circle")
   .attr("cx", d => xLinearScale(d[chosenXAxis]))
   .attr("cy", d => yLinearScale(d[chosenYAxis])) //(d.healthcare))
   .attr("r", 20)
   .attr("fill", "stateCircle") //from d3Style
-  .attr("opacity", ".5");
+  .attr("opacity", ".5")
+  // .append("text").text(function(data){
+  //   return Data.abbr;
+  // });
+
+  // circlesGroup.append("text")
+  //   .text(function(data){
+  //     return data.abbr;
+  //   });
 
 // Create group for three x-axis labels
 
@@ -304,7 +312,7 @@ ylabelsGroup.selectAll("text")
       circlesGroup = renderYCircles(circlesGroup, yLinearScale, chosenYAxis);
 
       // update toolTip with new info
-      // circlesGroup = updateToolTip(chosenXAxis, circlesGroup); // FALTA ACTUALIZAR
+      circlesGroup = updateToolTip(chosenXAxis, chosenYAxis ,circlesGroup);
 
       // changes classes to change bold text
       if (chosenYAxis === "healthcare") {
