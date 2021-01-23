@@ -66,17 +66,28 @@ function renderYAxes(newYScale, yAxis) {
 
 // function used for updating circles group with a transition to new circles on changes on X axes
 function renderCircles(circlesGroup, newXScale, chosenXAxis) {
-  circlesGroup.transition()
+  // To move the circles
+  circlesGroup.selectAll("circle").transition()
     .duration(1000)
     .attr("cx", d => newXScale(d[chosenXAxis]))
-    return circlesGroup;
+  // To move the text  
+  circlesGroup.selectAll("text").transition()
+    .duration(1000)
+    .attr("x", d => newXScale(d[chosenXAxis]))
+    return circlesGroup;  
 }
 
 // function used for updating circles group with a transition to new circles on changes on Y axes
 function renderYCircles(circlesGroup, newYScale, chosenYAxis) {
-  circlesGroup.transition()
+  // To move the circles
+  circlesGroup.selectAll("circle").transition()
     .duration(1000)
     .attr("cy", d => newYScale(d[chosenYAxis]));
+  // To move the text
+  circlesGroup.selectAll("text").transition()
+    .duration(1000)
+    .attr("y", d => newYScale(d[chosenYAxis]));
+  
     return circlesGroup;
 }
 
@@ -101,7 +112,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
   }
 
   var toolTip = d3.tip()
-    .attr("class", "tooltip")
+    .attr("class", "d3-tip")
     .offset([80, -60])
     .html(function(d) {
       return (`${d.state}<br>${label} ${d[chosenXAxis]}<br>${ylabel} ${d[chosenYAxis]}`);
@@ -132,8 +143,6 @@ readData.forEach(function(data) {
   data.obesity = +data.obesity;
   data.smokes = +data.smokes;
 });
-// let pov = readData.map(d=> d.poverty)
-// console.log(pov);
 
 // XLinearScale function called (defined above csv import code)
 var xLinearScale = xScale(readData, chosenXAxis);
@@ -141,10 +150,6 @@ var xLinearScale = xScale(readData, chosenXAxis);
 
 // YLinearScale function called
 var yLinearScale = yScale(readData, chosenYAxis);
-
-// var yLinearScale = d3.scaleLinear()
-// .domain([0, d3.max(readData, d => d.healthcare)])
-// .range([chartHeight, 0]);
 
 // Create initial axis functions
 var bottomAxis = d3.axisBottom(xLinearScale);
@@ -164,22 +169,30 @@ var yAxis = chartGroup.append("g") //take care
 // Append initial circles
 var circlesGroup = chartGroup.selectAll("circle")
   .data(readData)
-  .enter() 
-  .append("circle")
+  .enter()
+  .append("g")
+  
+  circlesGroup.append("circle")
   .attr("cx", d => xLinearScale(d[chosenXAxis]))
   .attr("cy", d => yLinearScale(d[chosenYAxis])) //(d.healthcare))
   .attr("r", 20)
   .attr("fill", "stateCircle") //from d3Style
   .attr("opacity", ".5")
-  // .append("text").text(function(data){
-  //   return Data.abbr;
-  // });
+  .attr("class", "stateCircle")
 
-  // circlesGroup.append("text")
-  //   .text(function(data){
-  //     return data.abbr;
-  //   });
+// This section of the code was suppose to add the text, but it does not work
+  circlesGroup.append("text").text(d => d.abbr)
+    .attr("x", d => xLinearScale(d[chosenXAxis]))
+    .attr("y", d => yLinearScale(d[chosenYAxis]))
+    .attr ("font-size", 10)
+    .attr("class", "stateText")
+    // .attr("dx", 20 / 2)
+    // .attr("dy", 20 / 2)
+    // .text(d => d.abbr)
 
+    // selectAll("text")
+    // .data(readData)
+    // .enter()
 // Create group for three x-axis labels
 
 var xlabelsGroup = chartGroup.append("g")
@@ -205,15 +218,6 @@ var labelIncome = xlabelsGroup.append("text")
   .attr("value", "income") //value to grab for event listener
   .classed("inactive", true)
   .text("Household Income (Median)");
-
-// // Append y axis THIS CODE IS VALID ONLY IF WE USE Healthcare as y
-// chartGroup.append("text")
-//   .attr("transform", "rotate(-90)")
-//   .attr("y", 0 - chartMargin.left)
-//   .attr("x", 0 - (chartHeight/2))
-//   .attr("dy", "1em")
-//   .classed("axis-text", true)
-//   .text("Lacks Healthcare (%)");
 
 // Create group for three y-axis labels
 
@@ -246,8 +250,6 @@ var labelSmokes = ylabelsGroup.append("text")
   // .classed("axis-text", true)
   .classed("inactive", true)
   .text("Smokes (%)");  
-
-
 
 // updateToolTip function
 var circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
